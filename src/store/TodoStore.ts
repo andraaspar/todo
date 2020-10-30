@@ -1,6 +1,8 @@
 import { throttle } from 'lodash'
 import { Store } from 'pullstate'
+import { v4 } from 'uuid'
 import { Todo } from '../model/Todo'
+import { TodoState } from '../model/TodoState'
 
 const LS_KEY = 'TodoStore'
 
@@ -30,14 +32,31 @@ function saveState() {
 }
 
 function loadState(): ITodoStore {
-	let store: ITodoStore = {
-		todosById: {},
-		todoOrder: [],
-	}
+	let store = makeTodoStoreState()
 	try {
-		store = JSON.parse(localStorage.getItem(LS_KEY)!) ?? store
+		const parsed = JSON.parse(localStorage.getItem(LS_KEY)!) as
+			| ITodoStore
+			| undefined
+			| null
+		if (parsed && parsed.todoOrder.length) {
+			store = parsed
+		}
 	} catch (e) {
 		console.error(e)
 	}
 	return store
+}
+
+export function makeTodoStoreState(): ITodoStore {
+	const id = v4()
+	return {
+		todosById: {
+			[id]: {
+				id: id,
+				name: '',
+				state: TodoState.NEW,
+			},
+		},
+		todoOrder: [id],
+	}
 }

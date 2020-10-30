@@ -1,8 +1,7 @@
 import React, { PropsWithChildren } from 'react'
 import { useHistory } from 'react-router-dom'
-import { withInterface } from '../fun/withInterface'
 import { TodoState } from '../model/TodoState'
-import { ITodoStore, TodoStore } from '../store/TodoStore'
+import { makeTodoStoreState, TodoStore } from '../store/TodoStore'
 import { DeleteTodoComp } from './DeleteTodoComp'
 import { IconComp } from './IconComp'
 import { Icons_arrowLeftShort, Icons_checkCircle, Icons_xCircle } from './Icons'
@@ -38,6 +37,7 @@ export function DeleteTodoListComp(
 								return true
 							})
 						})
+						ensureOneTodo()
 						history.goBack()
 					}}
 				>
@@ -48,15 +48,14 @@ export function DeleteTodoListComp(
 					onClick={() => {
 						TodoStore.update((s, o) => {
 							s.todoOrder = o.todoOrder.filter((id) => {
-								if (
-									o.todosById[id].state === TodoState.FAILED
-								) {
+								if (o.todosById[id].state === TodoState.FAILED) {
 									delete s.todosById[id]
 									return false
 								}
 								return true
 							})
 						})
+						ensureOneTodo()
 						history.goBack()
 					}}
 				>
@@ -65,12 +64,7 @@ export function DeleteTodoListComp(
 				<button
 					type='button'
 					onClick={() => {
-						TodoStore.update((s, o) => {
-							return withInterface<ITodoStore>({
-								todoOrder: [],
-								todosById: {},
-							})
-						})
+						TodoStore.update((s) => makeTodoStoreState())
 						history.goBack()
 					}}
 				>
@@ -82,4 +76,10 @@ export function DeleteTodoListComp(
 			))}
 		</>
 	)
+}
+
+function ensureOneTodo() {
+	if (TodoStore.getRawState().todoOrder.length === 0) {
+		TodoStore.update((s) => makeTodoStoreState())
+	}
 }
