@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Remove Service Worker</title>
+	</head>
+	<body>
+		<h1>Remove Service Worker</h1>
+		<p id="result">Working...</p>
+		<p><a href="./">Go back</a></p>
+		<script>
+			main()
+			async function main() {
+				try {
+					const registrations = await navigator.serviceWorker.getRegistrations()
+					for (const registration of registrations) {
+						const success = await registration.unregister()
+						if (!success) {
+							alert(`Could not unregister: ${registration.scope}`)
+						}
+					}
+					document.getElementById('result').innerText = 'Done.'
+				} catch (e) {
+					document.getElementById('result').innerText = e + ''
+				}
+			}
+		</script>
+	</body>
+</html>
