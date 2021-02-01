@@ -82,6 +82,53 @@ export function TodoComp(props: PropsWithChildren<TodoCompProps>) {
 						s.todosById[props.id].name = e.currentTarget.value
 					})
 				}}
+				onBeforeInput={(e) => {
+					const input = (e.nativeEvent as InputEvent).data
+					if (
+						typeof input === 'string' &&
+						input.length > 1 &&
+						/\n|\r/.test(input)
+					) {
+						e.preventDefault()
+						const arr = input.split(/[\r\n]+/g)
+						let focusStart: number | undefined = undefined
+						TodoStore.update((s) => {
+							const todo = s.todosById[props.id]
+							const start = Math.min(
+								e.currentTarget.selectionStart ?? 0,
+								e.currentTarget.selectionEnd ?? 0,
+							)
+							const end = Math.max(
+								e.currentTarget.selectionStart ?? todo.name.length,
+								e.currentTarget.selectionEnd ?? todo.name.length,
+							)
+							const last = todo.name.slice(end)
+							todo.name = todo.name.slice(0, start) + arr[0]
+
+							for (let i = 1; i < arr.length; i++) {
+								const name = i + 1 === arr.length ? arr[i] + last : arr[i]
+								focusStart = arr[i].length
+								const index = props.index + i
+								const id = v4()
+								s.todoOrder.splice(index, 0, id)
+								s.todosById[id] = {
+									id: id,
+									name: name,
+									state: TodoState.NEW,
+								}
+							}
+						})
+						requestAnimationFrame(() => {
+							requestAnimationFrame(() => {
+								focusByIndex(
+									props.index + arr.length - 1,
+									focusStart,
+									focusStart,
+								)
+							})
+						})
+					}
+				}}
 				onKeyDown={(e) => {
 					wasEmpty.current = e.currentTarget.value === ''
 					if (e.key === 'Backspace') {

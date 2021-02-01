@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 import { TodoState } from '../model/TodoState'
 import { TodoStore } from '../store/TodoStore'
 import { IconComp } from './IconComp'
-import { Icons_arrowUpDown, Icons_trash } from './Icons'
+import { Icons_arrowUpDown, Icons_clipboard, Icons_trash } from './Icons'
 import { TodoComp } from './TodoComp'
 
 export interface TodoListCompProps {}
@@ -29,6 +29,17 @@ export function TodoListComp(props: PropsWithChildren<TodoListCompProps>) {
 					}}
 				>
 					<IconComp icon={Icons_arrowUpDown} />
+				</button>
+				<button
+					type='button'
+					onClick={() => {
+						const s = TodoStore.getRawState()
+						navigator.clipboard.writeText(
+							s.todoOrder.map((id) => s.todosById[id].name).join('\n'),
+						)
+					}}
+				>
+					<IconComp icon={Icons_clipboard} />
 				</button>
 				<button
 					type='button'
