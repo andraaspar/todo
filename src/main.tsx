@@ -1,7 +1,7 @@
-import { mount, render } from 'matul'
+import { mount, render, setIsLogging } from 'matul'
 import { AppComp } from './comp/AppComp'
 
-// setIsLogging(false)
+setIsLogging(false)
 mount(document.getElementById('root')!, AppComp)
 render()
 
