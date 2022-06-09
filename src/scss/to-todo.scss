@@ -1,0 +1,20 @@
+.to-todo {
+	display: flex;
+	gap: 1px;
+}
+
+.to-todo--name {
+	flex: 1 0 var(--input-min-width);
+}
+
+.to-todo__delete,
+.to-todo__reorder {
+	display: flex;
+	width: 100%;
+	text-align: left;
+	padding: 5px;
+}
+
+.to-todo__reorder--top {
+	font-style: italic;
+}

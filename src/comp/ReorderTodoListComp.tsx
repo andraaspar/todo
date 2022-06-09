@@ -1,45 +1,51 @@
-import React, { PropsWithChildren, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
-import { AppStore } from '../store/AppStore'
-import { TodoStore } from '../store/TodoStore'
+import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { getUrl } from '../fun/getUrl'
+import { model } from '../model/model'
+import { getTodoLists } from '../model/todoLists'
+import { Icon } from './Icon'
 import { IconComp } from './IconComp'
-import { Icons_arrowLeftShort } from './Icons'
 import { ReorderTodoComp } from './ReorderTodoComp'
 
 export interface ReorderTodoListCompProps {}
+export interface ReorderTodoListCompState {}
 
-export function ReorderTodoListComp(
-	props: PropsWithChildren<ReorderTodoListCompProps>,
-) {
-	const todoOrder = TodoStore.useState((s) => s.todoOrder)
-	const reorderId = AppStore.useState((s) => s.reorderId)
-	const history = useHistory()
-	useEffect(
-		() => () => {
-			AppStore.update((s) => {
-				s.reorderId = null
-			})
-		},
-		[],
-	)
+export const ReorderTodoListComp: TRenderJSX<
+	ReorderTodoListCompProps,
+	ReorderTodoListCompState
+> = (_, v) => {
+	const todoLists = getTodoLists()
+	const id = getUrl().searchParams.get('id')!
+	const todoList = todoLists.find((it) => it.id === id)!
 	return (
-		<>
+		<div class='to-list'>
 			<h1 className='to-title'>Reorder TODOs</h1>
 			<div className='to-buttons'>
 				<button
 					type='button'
-					onClick={() => {
-						history.goBack()
+					onclick={() => {
+						history.back()
+						render()
 					}}
 				>
-					<IconComp icon={Icons_arrowLeftShort} />
+					<IconComp icon={Icon.arrowLeftShort} />
 				</button>
 			</div>
-			{todoOrder
-				.filter((id) => id !== reorderId)
-				.map((id) => (
-					<ReorderTodoComp key={id} id={id} />
+			{
+				<ReorderTodoComp
+					todoList={todoList}
+					index={-1}
+					disabled={model.todoToReorder == null}
+				/>
+			}
+			{todoList.todos
+				.filter((todo) => todo !== model.todoToReorder)
+				.map((todo) => (
+					<ReorderTodoComp
+						key={todo.id}
+						todoList={todoList}
+						index={todoList.todos.indexOf(todo)}
+					/>
 				))}
-		</>
+		</div>
 	)
 }

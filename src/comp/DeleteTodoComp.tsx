@@ -1,38 +1,42 @@
-import React, { PropsWithChildren } from 'react'
-import { useHistory } from 'react-router-dom'
+import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
 import { todoStateToIcon } from '../fun/todoStateToIcon'
+import { TodoList } from '../model/TodoList'
+import { saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
-import { TodoStore } from '../store/TodoStore'
+import { Icon } from './Icon'
 import { IconComp } from './IconComp'
-import { Icons_trash } from './Icons'
 
 export interface DeleteTodoCompProps {
-	id: string
+	todoList: TodoList
+	index: number
 }
+export interface DeleteTodoCompState {}
 
-export function DeleteTodoComp(props: PropsWithChildren<DeleteTodoCompProps>) {
-	const todo = TodoStore.useState((s) => s.todosById[props.id])
-	const history = useHistory()
+export const DeleteTodoComp: TRenderJSX<
+	DeleteTodoCompProps,
+	DeleteTodoCompState
+> = (_, v) => {
+	const todoList = v.props.todoList
+	const index = v.props.index
+	const todo = todoList.todos[index]
 	return (
 		<button
 			className='to-todo__delete'
 			type='button'
-			onClick={(e) => {
-				TodoStore.update((s, o) => {
-					if (s.todoOrder.length === 1) {
-						const todo = s.todosById[props.id]
-						todo.name = ''
-						todo.state = TodoState.NEW
-						history.goBack()
-					} else {
-						delete s.todosById[props.id]
-						s.todoOrder = o.todoOrder.filter((id) => id !== props.id)
-					}
-				})
+			onclick={() => {
+				if (todoList.todos.length === 1) {
+					todo.name = ''
+					todo.state = TodoState.NEW
+					history.back()
+				} else {
+					todoList.todos.splice(index, 1)
+					saveTodoLists()
+				}
+				render()
 			}}
 		>
 			<div className='to-todo--name'>
-				<IconComp icon={Icons_trash} />{' '}
+				<IconComp icon={Icon.trash} />{' '}
 				<IconComp icon={todoStateToIcon(todo.state)} /> {todo.name}
 			</div>
 		</button>

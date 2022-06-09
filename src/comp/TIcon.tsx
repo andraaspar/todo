@@ -1,1 +1,1 @@
-export type TIcon = typeof import('./Icons').Icons_checkCircle
+export type TIcon = keyof typeof import('./IconStrings')

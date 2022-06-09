@@ -1,0 +1,29 @@
+.to-lists {
+	display: flex;
+	flex-flow: column;
+	overflow: auto;
+	gap: 5px;
+}
+
+.to-list {
+	display: flex;
+	flex-flow: column;
+	overflow: auto;
+	gap: 1px;
+}
+
+.to-list__head {
+	display: flex;
+	flex-flow: row wrap;
+	overflow: auto;
+}
+
+.to-list__head__name-in {
+	&:not(#_) {
+		flex: 1 0 0;
+		font-weight: bold;
+		border-color: transparent;
+		box-shadow: none;
+		padding: 5px 0;
+	}
+}

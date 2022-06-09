@@ -1,50 +1,60 @@
-import React, { PropsWithChildren } from 'react'
+import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
 import { todoStateToIcon } from '../fun/todoStateToIcon'
-import { AppStore } from '../store/AppStore'
-import { TodoStore } from '../store/TodoStore'
+import { model } from '../model/model'
+import { Todo } from '../model/Todo'
+import { TodoList } from '../model/TodoList'
+import { saveTodoLists } from '../model/todoLists'
+import { TodoState } from '../model/TodoState'
+import { Icon } from './Icon'
 import { IconComp } from './IconComp'
-import { Icons_arrowDownShort, Icons_arrowRightShort } from './Icons'
 
 export interface ReorderTodoCompProps {
-	id: string
+	todoList: TodoList
+	index: number
+	disabled?: boolean
 }
+export interface ReorderTodoCompState {}
 
-export function ReorderTodoComp(
-	props: PropsWithChildren<ReorderTodoCompProps>,
-) {
-	const todo = TodoStore.useState((s) => s.todosById[props.id])
-	const reorderId = AppStore.useState((s) => s.reorderId)
+export const ReorderTodoComp: TRenderJSX<
+	ReorderTodoCompProps,
+	ReorderTodoCompState
+> = (_, v) => {
+	const { index, todoList } = v.props
+	const todo: Todo =
+		index >= 0
+			? todoList.todos[index]
+			: { id: crypto.randomUUID(), name: '< top >', state: TodoState.NEW }
 	return (
 		<button
-			className='to-todo__reorder'
+			class={['to-todo__reorder', index < 0 && 'to-todo__reorder--top']
+				.filter(Boolean)
+				.join(' ')}
 			type='button'
-			onClick={(e) => {
-				if (reorderId == null) {
-					AppStore.update((s) => {
-						s.reorderId = props.id
-					})
+			onclick={() => {
+				if (model.todoToReorder == null) {
+					model.todoToReorder = todo
+					render()
 				} else {
-					TodoStore.update((s, o) => {
-						const oldIndex = o.todoOrder.indexOf(reorderId)
-						let newIndex = o.todoOrder.indexOf(props.id) + 1
-						if (newIndex > oldIndex) {
-							newIndex--
-						}
-						s.todoOrder.splice(oldIndex, 1)
-						s.todoOrder.splice(newIndex, 0, reorderId)
-					})
-					AppStore.update((s) => {
-						s.reorderId = null
-					})
+					const oldIndex = todoList.todos.indexOf(model.todoToReorder)
+					let newIndex = index + 1
+					if (newIndex > oldIndex) {
+						newIndex--
+					}
+					todoList.todos.splice(oldIndex, 1)
+					todoList.todos.splice(newIndex, 0, model.todoToReorder)
+					model.todoToReorder = undefined
+					saveTodoLists()
+					render()
 				}
 			}}
+			disabled={v.props.disabled}
 		>
-			<div className='to-todo--name'>
+			<div class='to-todo--name'>
 				<IconComp
 					icon={
-						reorderId == null
-							? Icons_arrowRightShort
-							: Icons_arrowDownShort
+						model.todoToReorder == null
+							? Icon.arrowRightShort
+							: Icon.arrowDownShort
 					}
 				/>{' '}
 				<IconComp icon={todoStateToIcon(todo.state)} /> {todo.name}

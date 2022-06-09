@@ -1,19 +1,33 @@
-import React, { PropsWithChildren } from 'react'
-import { Route, Switch } from 'react-router-dom'
+import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { getUrl } from '../fun/getUrl'
 import { DeleteTodoListComp } from './DeleteTodoListComp'
+import { IconsComp } from './IconsComp'
 import { ReorderTodoListComp } from './ReorderTodoListComp'
-import { TodoListComp } from './TodoListComp'
+import { TodoListsComp } from './TodoListsComp'
 
 export interface AppCompProps {}
+export interface AppCompState {}
 
-export function AppComp(props: PropsWithChildren<AppCompProps>) {
+export const AppComp: TRenderJSX<AppCompProps, AppCompState> = (_, v) => {
+	v.onadded = () => {
+		window.addEventListener('hashchange', () => {
+			render()
+		})
+	}
 	return (
 		<>
-			<Switch>
-				<Route path='/delete' component={DeleteTodoListComp} />
-				<Route path='/reorder' component={ReorderTodoListComp} />
-				<Route path='/' component={TodoListComp} />
-			</Switch>
+			<IconsComp />
+			{(() => {
+				switch (getUrl().pathname) {
+					case '/delete':
+						return <DeleteTodoListComp />
+					case '/reorder':
+						return <ReorderTodoListComp />
+					case '/':
+					default:
+						return <TodoListsComp />
+				}
+			})()}
 		</>
 	)
 }

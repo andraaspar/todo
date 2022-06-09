@@ -1,63 +1,85 @@
-import React, { PropsWithChildren } from 'react'
-import { useHistory } from 'react-router-dom'
+import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
-import { TodoStore } from '../store/TodoStore'
+import { Icon } from './Icon'
 import { IconComp } from './IconComp'
-import { Icons_arrowUpDown, Icons_clipboard, Icons_trash } from './Icons'
 import { TodoComp } from './TodoComp'
 
-export interface TodoListCompProps {}
+export interface TodoListCompProps {
+	index: number
+}
+export interface TodoListCompState {}
 
-export function TodoListComp(props: PropsWithChildren<TodoListCompProps>) {
-	const todoOrder = TodoStore.useState((s) => s.todoOrder)
-	const history = useHistory()
+export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
+	_,
+	v,
+) => {
+	const todoList = getTodoLists()[v.props.index]
 	return (
-		<>
-			<div className='to-buttons'>
+		<div class='to-list'>
+			<div class='to-list__head'>
+				<input
+					class='to-list__head__name-in'
+					value={todoList.name}
+					oninput={function (this: HTMLInputElement) {
+						todoList.name = this.value
+						saveTodoLists()
+					}}
+				/>
+			</div>
+			<div class='to-buttons'>
 				<button
 					type='button'
-					onClick={() => {
-						history.push(`/delete`)
+					onclick={() => {
+						location.hash = `/delete?id=${encodeURIComponent(todoList.id)}`
+						render()
 					}}
 				>
-					<IconComp icon={Icons_trash} />
+					<IconComp icon={Icon.trash} />
 				</button>
 				<button
 					type='button'
-					onClick={() => {
-						history.push(`/reorder`)
+					onclick={() => {
+						location.hash = `/reorder?id=${encodeURIComponent(todoList.id)}`
+						render()
 					}}
 				>
-					<IconComp icon={Icons_arrowUpDown} />
+					<IconComp icon={Icon.arrowUpDown} />
 				</button>
 				<button
 					type='button'
-					onClick={() => {
-						const s = TodoStore.getRawState()
+					onclick={() => {
 						navigator.clipboard.writeText(
-							s.todoOrder.map((id) => s.todosById[id].name).join('\n'),
+							todoList.todos.map((todo) => todo.name).join('\n'),
 						)
 					}}
 				>
-					<IconComp icon={Icons_clipboard} />
+					<IconComp icon={Icon.clipboard} />
 				</button>
 				<button
 					type='button'
 					style={{ marginLeft: 'auto' }}
-					onClick={() => {
-						TodoStore.update((s, o) => {
-							for (const todo of Object.values(s.todosById)) {
-								todo.state = TodoState.NEW
-							}
-						})
+					onclick={() => {
+						for (const todo of todoList.todos) {
+							todo.state = TodoState.NEW
+						}
+						saveTodoLists()
+						render()
 					}}
 				>
 					Reset all
 				</button>
 			</div>
-			{todoOrder.map((id, index) => {
-				return <TodoComp key={id} id={id} index={index} />
+			{todoList.todos.map((todo, index) => {
+				return (
+					<TodoComp
+						key={todo.id}
+						id={todo.id}
+						todoList={todoList}
+						index={index}
+					/>
+				)
 			})}
-		</>
+		</div>
 	)
 }

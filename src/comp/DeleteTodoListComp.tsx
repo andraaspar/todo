@@ -1,85 +1,83 @@
-import React, { PropsWithChildren } from 'react'
-import { useHistory } from 'react-router-dom'
+import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { getUrl } from '../fun/getUrl'
+import { makeDefaultTodo } from '../fun/makeDefaultTodo'
+import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
-import { makeTodoStoreState, TodoStore } from '../store/TodoStore'
 import { DeleteTodoComp } from './DeleteTodoComp'
+import { Icon } from './Icon'
 import { IconComp } from './IconComp'
-import { Icons_arrowLeftShort, Icons_checkCircle, Icons_xCircle } from './Icons'
 
 export interface DeleteTodoListCompProps {}
+export interface DeleteTodoListCompState {}
 
-export function DeleteTodoListComp(
-	props: PropsWithChildren<DeleteTodoListCompProps>,
-) {
-	const history = useHistory()
-	const todoOrder = TodoStore.useState((s) => s.todoOrder)
+export const DeleteTodoListComp: TRenderJSX<
+	DeleteTodoListCompProps,
+	DeleteTodoListCompState
+> = (_, v) => {
+	const todoLists = getTodoLists()
+	const id = getUrl().searchParams.get('id')
+	const todoList = todoLists.find((it) => it.id === id)!
+	function ensureOneTodo() {
+		if (todoList.todos.length === 0) {
+			todoList.todos.push(makeDefaultTodo())
+		}
+	}
 	return (
-		<>
+		<div class='to-list'>
 			<h1 className='to-title'>Delete TODOs</h1>
 			<div className='to-buttons'>
 				<button
 					type='button'
-					onClick={() => {
-						history.goBack()
+					onclick={() => {
+						history.back()
+						render()
 					}}
 				>
-					<IconComp icon={Icons_arrowLeftShort} />
+					<IconComp icon={Icon.arrowLeftShort} />
 				</button>
 				<button
 					type='button'
-					onClick={() => {
-						TodoStore.update((s, o) => {
-							s.todoOrder = o.todoOrder.filter((id) => {
-								if (o.todosById[id].state === TodoState.DONE) {
-									delete s.todosById[id]
-									return false
-								}
-								return true
-							})
-						})
+					onclick={() => {
+						todoList.todos = todoList.todos.filter(
+							(it) => it.state !== TodoState.DONE,
+						)
 						ensureOneTodo()
-						history.goBack()
+						saveTodoLists()
+						history.back()
+						render()
 					}}
 				>
-					Delete done <IconComp icon={Icons_checkCircle} />
+					Delete done <IconComp icon={Icon.checkCircle} />
 				</button>
 				<button
 					type='button'
-					onClick={() => {
-						TodoStore.update((s, o) => {
-							s.todoOrder = o.todoOrder.filter((id) => {
-								if (o.todosById[id].state === TodoState.FAILED) {
-									delete s.todosById[id]
-									return false
-								}
-								return true
-							})
-						})
+					onclick={() => {
+						todoList.todos = todoList.todos.filter(
+							(it) => it.state !== TodoState.FAILED,
+						)
 						ensureOneTodo()
-						history.goBack()
+						saveTodoLists()
+						history.back()
+						render()
 					}}
 				>
-					Delete failed <IconComp icon={Icons_xCircle} />
+					Delete failed <IconComp icon={Icon.xCircle} />
 				</button>
 				<button
 					type='button'
-					onClick={() => {
-						TodoStore.update((s) => makeTodoStoreState())
-						history.goBack()
+					onclick={() => {
+						todoList.todos = [makeDefaultTodo()]
+						saveTodoLists()
+						history.back()
+						render()
 					}}
 				>
 					Delete all
 				</button>
 			</div>
-			{todoOrder.map((id) => (
-				<DeleteTodoComp key={id} id={id} />
+			{todoList.todos.map((todo, index) => (
+				<DeleteTodoComp key={todo.id} todoList={todoList} index={index} />
 			))}
-		</>
+		</div>
 	)
-}
-
-function ensureOneTodo() {
-	if (TodoStore.getRawState().todoOrder.length === 0) {
-		TodoStore.update((s) => makeTodoStoreState())
-	}
 }
