@@ -1,4 +1,6 @@
 import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { focusByIndex } from '../fun/focusByIndex'
+import { getFocusIndex } from '../fun/getFocusIndex'
 import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
 import { Icon } from './Icon'
@@ -8,7 +10,9 @@ import { TodoComp } from './TodoComp'
 export interface TodoListCompProps {
 	index: number
 }
-export interface TodoListCompState {}
+export interface TodoListCompState {
+	nameInRef: HTMLInputElement
+}
 
 export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 	_,
@@ -19,11 +23,32 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 		<div class='to-list'>
 			<div class='to-list__head'>
 				<input
+					ref={(r: HTMLInputElement) => {
+						v.state.nameInRef = r
+					}}
 					class='to-list__head__name-in'
 					value={todoList.name}
 					oninput={function (this: HTMLInputElement) {
 						todoList.name = this.value
 						saveTodoLists()
+					}}
+					onkeydown={function (this: HTMLInputElement, e: KeyboardEvent) {
+						if (e.key === 'ArrowUp') {
+							e.preventDefault()
+						} else if (e.key === 'ArrowDown') {
+							e.preventDefault()
+						}
+					}}
+					onkeyup={async function (this: HTMLInputElement, e: KeyboardEvent) {
+						if (e.key === 'ArrowUp') {
+							e.preventDefault()
+							const start = this.selectionStart ?? 0
+							focusByIndex(getFocusIndex(v.state.nameInRef!) - 1, start, start)
+						} else if (e.key === 'ArrowDown') {
+							e.preventDefault()
+							const end = this.selectionEnd ?? this.value.length
+							focusByIndex(getFocusIndex(v.state.nameInRef!) + 1, end, end)
+						}
 					}}
 				/>
 			</div>

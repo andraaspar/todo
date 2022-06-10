@@ -1,4 +1,6 @@
 import { createElement, render, TRenderJSX } from 'matul'
+import { focusByIndex } from '../fun/focusByIndex'
+import { getFocusIndex } from '../fun/getFocusIndex'
 import { makeDefaultTodo } from '../fun/makeDefaultTodo'
 import { todoStateToIcon } from '../fun/todoStateToIcon'
 import { TodoList } from '../model/TodoList'
@@ -14,6 +16,7 @@ export interface TodoCompProps {
 export interface TodoCompState {
 	wasEmpty: boolean
 	wasEdge: boolean
+	nameInRef: HTMLInputElement
 }
 
 export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
@@ -33,31 +36,32 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 					target.classList.contains('to-todo--name')
 				) {
 					const prevItem = todoList.todos[index - 1]
-					if (
-						todo.name.trim() === '' ||
-						(prevItem && prevItem.name.trim() === '')
-					) {
+					const todoNameEmpty = todo.name.trim() === ''
+					if (todoNameEmpty || (prevItem && prevItem.name.trim() === '')) {
 						const todoLists = getTodoLists()
 						const listIndex = todoLists.indexOf(todoList)
 						const newListId = crypto.randomUUID()
+						const newListName = `List #${listIndex + 2}`
 						todoLists.splice(listIndex + 1, 0, {
 							id: newListId,
-							name: `List #${listIndex + 2}`,
-							todos: todoList.todos.slice(index),
+							name: newListName,
+							todos: todoList.todos.slice(
+								index +
+									(todoNameEmpty && index < todoList.todos.length - 1 ? 1 : 0),
+							),
 						})
-						todoList.todos.length = todo.name.trim() === '' ? index : index - 1
+						todoList.todos.length = todoNameEmpty ? index : index - 1
 						if (todoList.todos.length === 0) {
 							todoList.todos.push(makeDefaultTodo())
 						}
 						saveTodoLists()
+						const focusIndex = getFocusIndex(v.state.nameInRef!)
 						await render()
-						const newInput = document.getElementById(
-							`list-${newListId}-input-${todo.id}`,
+						focusByIndex(
+							focusIndex + (todoNameEmpty ? 0 : -1),
+							0,
+							newListName.length,
 						)
-						if (newInput instanceof HTMLInputElement) {
-							newInput.focus()
-							newInput.setSelectionRange(0, 0)
-						}
 					} else {
 						const value1 = target.value.slice(
 							0,
@@ -81,14 +85,9 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 							state: TodoState.NEW,
 						})
 						saveTodoLists()
+						const focusIndex = getFocusIndex(v.state.nameInRef!)
 						await render()
-						const newInput = document.getElementById(
-							`list-${todoList.id}-input-${newTodoId}`,
-						)
-						if (newInput instanceof HTMLInputElement) {
-							newInput.focus()
-							newInput.setSelectionRange(0, 0)
-						}
+						focusByIndex(focusIndex + 1, 0, 0)
 					}
 				}
 			}}
@@ -106,11 +105,14 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 				<IconComp icon={todoStateToIcon(todo.state)} />
 			</button>
 			<input
+				ref={(r: HTMLInputElement) => {
+					v.state.nameInRef = r
+				}}
 				id={`list-${todoList.id}-input-${todo.id}`}
 				className='to-todo--name'
 				value={todo.name}
 				autoComplete='off'
-				onchange={function (this: HTMLInputElement, e: Event) {
+				oninput={function (this: HTMLInputElement) {
 					todo.name = this.value
 					saveTodoLists()
 					render()
@@ -147,18 +149,11 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 								state: TodoState.NEW,
 							})
 						}
+						saveTodoLists()
+						const focusIndex = getFocusIndex(v.state.nameInRef!)
 						await render()
-						focusByIndex(
-							todoList,
-							v.props.index + arr.length - 1,
-							focusStart,
-							focusStart,
-						)
+						focusByIndex(focusIndex + arr.length - 1, focusStart, focusStart)
 					}
-				}}
-				oninput={function (this: HTMLInputElement) {
-					todo.name = this.value
-					saveTodoLists()
 				}}
 				onkeydown={function (this: HTMLInputElement, e: KeyboardEvent) {
 					v.state.wasEmpty = this.value === ''
@@ -198,11 +193,12 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 								prevTodo.name += todo.name
 								todoList.todos.splice(index, 1)
 								saveTodoLists()
+								const focusIndex = getFocusIndex(v.state.nameInRef!)
 								await render()
-								focusByIndex(todoList, index - 1, prevNameEnd, prevNameEnd)
+								focusByIndex(focusIndex - 1, prevNameEnd, prevNameEnd)
 							} else if (listIndex > 0) {
 								const prevList = todoLists[listIndex - 1]
-								if (todo.name.trim() !== '' || todoList.todos.length > 1) {
+								if (todoList.todos.length > 1 || todo.name.trim() !== '') {
 									prevList.todos = [...prevList.todos, ...todoList.todos]
 									prevNameEnd = 0
 								} else {
@@ -210,58 +206,50 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 								}
 								todoLists.splice(listIndex, 1)
 								saveTodoLists()
+								const focusIndex = getFocusIndex(v.state.nameInRef!)
 								await render()
-								focusByIndex(
-									prevList,
-									prevList.todos.length - todoList.todos.length,
-									prevNameEnd,
-									prevNameEnd,
-								)
+								focusByIndex(focusIndex - 1, prevNameEnd, prevNameEnd)
 							}
 						}
 					} else if (e.key === 'Delete') {
 						if (v.state.wasEdge) {
-							let origNameEnd: number | undefined = undefined
+							const origNameEnd: number = todo.name.length
 							const index = v.props.index
+							const todoLists = getTodoLists()
+							const listIndex = todoLists.indexOf(todoList)
 							if (index < todoList.todos.length - 1) {
 								const nextTodo = todoList.todos[index + 1]
-								origNameEnd = todo.name.length
 								todo.name += nextTodo.name
 								todoList.todos.splice(index + 1, 1)
-								saveTodoLists()
+							} else if (listIndex < todoLists.length - 1) {
+								const nextList = todoLists[listIndex + 1]
+								if (
+									nextList.todos.length > 1 ||
+									nextList.todos[0].name.trim() !== ''
+								) {
+									todoList.todos = [...todoList.todos, ...nextList.todos]
+								}
+								todoLists.splice(listIndex + 1, 1)
 							}
+							saveTodoLists()
 							await render()
-							focusByIndex(todoList, index, origNameEnd, origNameEnd)
+							focusByIndex(
+								getFocusIndex(v.state.nameInRef!),
+								origNameEnd,
+								origNameEnd,
+							)
 						}
 					} else if (e.key === 'ArrowUp') {
 						e.preventDefault()
 						const start = this.selectionStart ?? 0
-						focusByIndex(todoList, v.props.index - 1, start, start)
+						focusByIndex(getFocusIndex(v.state.nameInRef!) - 1, start, start)
 					} else if (e.key === 'ArrowDown') {
 						e.preventDefault()
 						const end = this.selectionEnd ?? this.value.length
-						focusByIndex(todoList, v.props.index + 1, end, end)
+						focusByIndex(getFocusIndex(v.state.nameInRef!) + 1, end, end)
 					}
 				}}
 			/>
 		</form>
 	)
-}
-
-function focusByIndex(
-	todoList: TodoList,
-	index: number,
-	start?: number,
-	end?: number,
-) {
-	const id = todoList.todos[index]?.id
-	if (id != null) {
-		const input = document.getElementById(`list-${todoList.id}-input-${id}`)
-		if (input instanceof HTMLInputElement) {
-			input.focus()
-			if (start != null && end != null) {
-				input.setSelectionRange(start, end)
-			}
-		}
-	}
 }
