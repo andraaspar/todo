@@ -28,6 +28,7 @@ export const AppComp: TRenderJSX<AppCompProps, AppCompState> = (_, v) => {
 						return <TodoListsComp />
 				}
 			})()}
+			<footer>Version: {process.env.BUILD_TIME}</footer>
 		</>
 	)
 }
