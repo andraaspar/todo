@@ -8,7 +8,12 @@ SW_SELF.addEventListener('install', (event) => {
 	event.waitUntil(
 		(async () => {
 			const cache = await caches.open(cacheName)
-			await cache.addAll(manifest)
+			for (const url in manifest) {
+				const response = await fetch(url, {
+					cache: 'reload',
+				})
+				await cache.put(url, response)
+			}
 		})(),
 	)
 })
