@@ -1,11 +1,14 @@
 import { createElement, render, TRenderJSX } from 'matul'
 import { focusByIndex } from '../fun/focusByIndex'
 import { getFocusIndex } from '../fun/getFocusIndex'
+import { incrementNameMulti } from '../fun/incrementNameMulti'
 import { makeDefaultTodo } from '../fun/makeDefaultTodo'
 import { todoStateToIcon } from '../fun/todoStateToIcon'
+import { Todo } from '../model/Todo'
 import { TodoList } from '../model/TodoList'
 import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState, TodoStates } from '../model/TodoState'
+import { Icon } from './Icon'
 import { IconComp } from './IconComp'
 
 export interface TodoCompProps {
@@ -40,16 +43,20 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 					if (todoNameEmpty || (prevItem && prevItem.name.trim() === '')) {
 						const todoLists = getTodoLists()
 						const listIndex = todoLists.indexOf(todoList)
-						const newListId = crypto.randomUUID()
 						const newListName = `List #${listIndex + 2}`
-						todoLists.splice(listIndex + 1, 0, {
-							id: newListId,
-							name: newListName,
-							todos: todoList.todos.slice(
-								index +
-									(todoNameEmpty && index < todoList.todos.length - 1 ? 1 : 0),
-							),
-						})
+						todoLists.splice(
+							listIndex + 1,
+							0,
+							new TodoList({
+								name: newListName,
+								todos: todoList.todos.slice(
+									index +
+										(todoNameEmpty && index < todoList.todos.length - 1
+											? 1
+											: 0),
+								),
+							}),
+						)
 						todoList.todos.length = todoNameEmpty ? index : index - 1
 						if (todoList.todos.length === 0) {
 							todoList.todos.push(makeDefaultTodo())
@@ -77,13 +84,15 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 							),
 							target.value.length,
 						)
-						const newTodoId = crypto.randomUUID()
 						todo.name = value1
-						todoList.todos.splice(v.props.index + 1, 0, {
-							id: newTodoId,
-							name: value2,
-							state: TodoState.NEW,
-						})
+						todoList.todos.splice(
+							v.props.index + 1,
+							0,
+							new Todo({
+								name: value2,
+								state: TodoState.NEW,
+							}),
+						)
 						saveTodoLists()
 						const focusIndex = getFocusIndex(v.state.nameInRef!)
 						await render()
@@ -143,11 +152,14 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 							focusStart = arr[i].length
 							const index = v.props.index + i
 							const id = crypto.randomUUID()
-							todoList.todos.splice(index, 0, {
-								id: id,
-								name: name,
-								state: TodoState.NEW,
-							})
+							todoList.todos.splice(
+								index,
+								0,
+								new Todo({
+									name: name,
+									state: TodoState.NEW,
+								}),
+							)
 						}
 						saveTodoLists()
 						const focusIndex = getFocusIndex(v.state.nameInRef!)
@@ -198,15 +210,16 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 								focusByIndex(focusIndex - 1, prevNameEnd, prevNameEnd)
 							} else if (listIndex > 0) {
 								const prevList = todoLists[listIndex - 1]
+								let focusIndex = getFocusIndex(v.state.nameInRef!)
 								if (todoList.todos.length > 1 || todo.name.trim() !== '') {
 									prevList.todos = [...prevList.todos, ...todoList.todos]
 									prevNameEnd = 0
 								} else {
 									prevNameEnd = prevList.todos.at(-1)?.name.length || 0
+									focusIndex--
 								}
 								todoLists.splice(listIndex, 1)
 								saveTodoLists()
-								const focusIndex = getFocusIndex(v.state.nameInRef!)
 								await render()
 								focusByIndex(focusIndex - 1, prevNameEnd, prevNameEnd)
 							}
@@ -250,6 +263,15 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 					}
 				}}
 			/>
+			<button
+				type='button'
+				onclick={() => {
+					todo.name = incrementNameMulti(todo.name)
+					render()
+				}}
+			>
+				<IconComp icon={Icon.plus} />
+			</button>
 		</form>
 	)
 }

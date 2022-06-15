@@ -1,5 +1,6 @@
 import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
 import { focusByIndex } from '../fun/focusByIndex'
+import { formatNumber } from '../fun/formatNumber'
 import { getFocusIndex } from '../fun/getFocusIndex'
 import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
@@ -19,6 +20,7 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 	v,
 ) => {
 	const todoList = getTodoLists()[v.props.index]
+	const value = todoList.value
 	return (
 		<div class='to-list'>
 			<div class='to-list__head'>
@@ -51,6 +53,15 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 						}
 					}}
 				/>
+				<div class='to-list__head__value'>{formatNumber(value)}</div>
+				<button
+					type='button'
+					onclick={() => {
+						navigator.clipboard.writeText(value + '')
+					}}
+				>
+					<IconComp icon={Icon.clipboard} />
+				</button>
 			</div>
 			<div class='to-buttons'>
 				<button
@@ -83,7 +94,7 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 				</button>
 				<button
 					type='button'
-					style={{ marginLeft: 'auto' }}
+					style='margin-left:auto'
 					onclick={() => {
 						for (const todo of todoList.todos) {
 							todo.state = TodoState.NEW
@@ -95,16 +106,14 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 					Reset all
 				</button>
 			</div>
-			{todoList.todos.map((todo, index) => {
-				return (
-					<TodoComp
-						key={todo.id}
-						id={todo.id}
-						todoList={todoList}
-						index={index}
-					/>
-				)
-			})}
+			{todoList.todos.map((todo, index) => (
+				<TodoComp
+					key={todo.id}
+					id={todo.id}
+					todoList={todoList}
+					index={index}
+				/>
+			))}
 		</div>
 	)
 }

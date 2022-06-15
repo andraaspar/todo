@@ -16,6 +16,7 @@
 	display: flex;
 	flex-flow: row wrap;
 	overflow: auto;
+	align-items: baseline;
 }
 
 .to-list__head__name-in {
@@ -26,4 +27,9 @@
 		box-shadow: none;
 		padding: 5px 0;
 	}
+}
+
+.to-list__head__value {
+	padding: 0 5px;
+	font-weight: bold;
 }

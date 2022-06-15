@@ -23,7 +23,10 @@ export const ReorderTodoComp: TRenderJSX<
 	const todo: Todo =
 		index >= 0
 			? todoList.todos[index]
-			: { id: crypto.randomUUID(), name: '< top >', state: TodoState.NEW }
+			: new Todo({
+					name: '< top >',
+					state: TodoState.NEW,
+			  })
 	return (
 		<button
 			class={['to-todo__reorder', index < 0 && 'to-todo__reorder--top']
