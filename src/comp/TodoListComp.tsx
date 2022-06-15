@@ -53,15 +53,19 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 						}
 					}}
 				/>
-				<div class='to-list__head__value'>{formatNumber(value)}</div>
-				<button
-					type='button'
-					onclick={() => {
-						navigator.clipboard.writeText(value + '')
-					}}
-				>
-					<IconComp icon={Icon.clipboard} />
-				</button>
+				{value != 0 && (
+					<div class='to-list__head__value'>{formatNumber(value)}</div>
+				)}
+				{value != 0 && (
+					<button
+						type='button'
+						onclick={() => {
+							navigator.clipboard.writeText(value + '')
+						}}
+					>
+						<IconComp icon={Icon.clipboard} />
+					</button>
+				)}
 			</div>
 			<div class='to-buttons'>
 				<button
