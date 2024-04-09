@@ -1,5 +1,6 @@
-import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { createElement, FragmentComp, TRenderJSX } from 'matul'
 import { getUrl } from '../fun/getUrl'
+import { goBack } from '../fun/goBack'
 import { makeDefaultTodo } from '../fun/makeDefaultTodo'
 import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
@@ -28,9 +29,8 @@ export const DeleteTodoListComp: TRenderJSX<
 			<div className='to-buttons'>
 				<button
 					type='button'
-					onclick={() => {
-						history.back()
-						render()
+					onclick={async () => {
+						goBack()
 					}}
 				>
 					<IconComp icon={Icon.arrowLeftShort} />
@@ -43,8 +43,7 @@ export const DeleteTodoListComp: TRenderJSX<
 						)
 						ensureOneTodo()
 						saveTodoLists()
-						history.back()
-						render()
+						goBack()
 					}}
 				>
 					Delete done <IconComp icon={Icon.checkCircle} />
@@ -57,8 +56,7 @@ export const DeleteTodoListComp: TRenderJSX<
 						)
 						ensureOneTodo()
 						saveTodoLists()
-						history.back()
-						render()
+						goBack()
 					}}
 				>
 					Delete failed <IconComp icon={Icon.xCircle} />
@@ -68,8 +66,7 @@ export const DeleteTodoListComp: TRenderJSX<
 					onclick={() => {
 						todoList.todos = [makeDefaultTodo()]
 						saveTodoLists()
-						history.back()
-						render()
+						goBack()
 					}}
 				>
 					Delete all

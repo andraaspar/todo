@@ -108,6 +108,7 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 					const newIndex = (index + 1) % TodoStates.length
 					todo.state = TodoStates[newIndex]
 					saveTodoLists()
+					v.state.nameInRef?.focus()
 					render()
 				}}
 			>
@@ -265,9 +266,15 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 			/>
 			<button
 				type='button'
-				onclick={() => {
+				onclick={async () => {
 					todo.name = incrementNameMulti(todo.name)
-					render()
+					saveTodoLists()
+					v.state.nameInRef?.focus()
+					await render()
+					v.state.nameInRef?.setSelectionRange(
+						0,
+						todo.name.split('x', 2).at(0)?.length ?? 0,
+					)
 				}}
 			>
 				<IconComp icon={Icon.plus} />

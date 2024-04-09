@@ -1,5 +1,6 @@
-import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { createElement, FragmentComp, TRenderJSX } from 'matul'
 import { getUrl } from '../fun/getUrl'
+import { goBack } from '../fun/goBack'
 import { model } from '../model/model'
 import { getTodoLists } from '../model/todoLists'
 import { Icon } from './Icon'
@@ -20,13 +21,7 @@ export const ReorderTodoListComp: TRenderJSX<
 		<div class='to-list'>
 			<h1 className='to-title'>Reorder TODOs</h1>
 			<div className='to-buttons'>
-				<button
-					type='button'
-					onclick={() => {
-						history.back()
-						render()
-					}}
-				>
+				<button type='button' onclick={goBack}>
 					<IconComp icon={Icon.arrowLeftShort} />
 				</button>
 			</div>

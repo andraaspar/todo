@@ -2,6 +2,7 @@ import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
 import { focusByIndex } from '../fun/focusByIndex'
 import { formatNumber } from '../fun/formatNumber'
 import { getFocusIndex } from '../fun/getFocusIndex'
+import { goTo } from '../fun/goTo'
 import { getTodoLists, saveTodoLists } from '../model/todoLists'
 import { TodoState } from '../model/TodoState'
 import { Icon } from './Icon'
@@ -71,8 +72,7 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 				<button
 					type='button'
 					onclick={() => {
-						location.hash = `/delete?id=${encodeURIComponent(todoList.id)}`
-						render()
+						goTo(`/delete?id=${encodeURIComponent(todoList.id)}`)
 					}}
 				>
 					<IconComp icon={Icon.trash} />
@@ -80,8 +80,7 @@ export const TodoListComp: TRenderJSX<TodoListCompProps, TodoListCompState> = (
 				<button
 					type='button'
 					onclick={() => {
-						location.hash = `/reorder?id=${encodeURIComponent(todoList.id)}`
-						render()
+						goTo(`/reorder?id=${encodeURIComponent(todoList.id)}`)
 					}}
 				>
 					<IconComp icon={Icon.arrowUpDown} />

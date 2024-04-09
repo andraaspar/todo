@@ -1,4 +1,5 @@
 import { createElement, FragmentComp, render, TRenderJSX } from 'matul'
+import { goBack } from '../fun/goBack'
 import { todoStateToIcon } from '../fun/todoStateToIcon'
 import { TodoList } from '../model/TodoList'
 import { saveTodoLists } from '../model/todoLists'
@@ -27,12 +28,13 @@ export const DeleteTodoComp: TRenderJSX<
 				if (todoList.todos.length === 1) {
 					todo.name = ''
 					todo.state = TodoState.NEW
-					history.back()
+					saveTodoLists()
+					goBack()
 				} else {
 					todoList.todos.splice(index, 1)
 					saveTodoLists()
+					render()
 				}
-				render()
 			}}
 		>
 			<div className='to-todo--name'>
