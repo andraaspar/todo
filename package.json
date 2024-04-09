@@ -4,25 +4,23 @@
 	"homepage": "https://andraaspar.github.io/todo",
 	"private": true,
 	"dependencies": {
-		"@parcel/service-worker": "2.5.0",
-		"@parcel/validator-typescript": "2.5.0",
-		"gh-pages": "^4.0.0",
-		"matul": "^0.0.8",
-		"parcel": "2.5.0",
-		"rimraf": "^3.0.2",
-		"typescript": "^4.7.3"
+		"@parcel/packager-raw-url": "2.12.0",
+		"@parcel/service-worker": "2.12.0",
+		"@parcel/transformer-inline-string": "2.12.0",
+		"@parcel/transformer-sass": "2.12.0",
+		"@parcel/transformer-typescript-tsc": "2.12.0",
+		"@parcel/transformer-webmanifest": "2.12.0",
+		"@parcel/validator-typescript": "2.12.0",
+		"gh-pages": "^6.1.1",
+		"matul": "^0.0.13",
+		"parcel": "2.12.0",
+		"rimraf": "^5.0.5",
+		"typescript": "^5.4.4"
 	},
 	"scripts": {
 		"_env": "node -p \"'BUILD_TIME=' + new Date().toLocaleString()\" > .env",
 		"start": "yarn _env && rimraf public && parcel -p 8080 --dist-dir public src/index.html",
 		"build": "yarn _env && rimraf public && parcel build --public-url \".\" --dist-dir public --no-source-maps src/index.html",
 		"deploy": "gh-pages -d public"
-	},
-	"devDependencies": {
-		"@parcel/packager-raw-url": "2.5.0",
-		"@parcel/transformer-inline-string": "2.5.0",
-		"@parcel/transformer-sass": "2.5.0",
-		"@parcel/transformer-typescript-tsc": "2.5.0",
-		"@parcel/transformer-webmanifest": "2.5.0"
 	}
 }
