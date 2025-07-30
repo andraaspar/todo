@@ -4,23 +4,23 @@
 	"homepage": "https://andraaspar.github.io/todo",
 	"private": true,
 	"dependencies": {
-		"@parcel/packager-raw-url": "2.12.0",
-		"@parcel/service-worker": "2.12.0",
-		"@parcel/transformer-inline-string": "2.12.0",
-		"@parcel/transformer-sass": "2.12.0",
-		"@parcel/transformer-typescript-tsc": "2.12.0",
-		"@parcel/transformer-webmanifest": "2.12.0",
-		"@parcel/validator-typescript": "2.12.0",
-		"gh-pages": "^6.1.1",
+		"@parcel/packager-raw-url": "2.15.4",
+		"@parcel/service-worker": "2.15.4",
+		"@parcel/transformer-inline-string": "2.15.4",
+		"@parcel/transformer-sass": "2.15.4",
+		"@parcel/transformer-typescript-tsc": "2.15.4",
+		"@parcel/transformer-webmanifest": "2.15.4",
+		"@parcel/validator-typescript": "2.15.4",
+		"gh-pages": "^6.3.0",
 		"matul": "^0.0.13",
-		"parcel": "2.12.0",
-		"rimraf": "^5.0.5",
-		"typescript": "^5.4.4"
+		"parcel": "2.15.4",
+		"rimraf": "^6.0.1",
+		"typescript": "^5.8.3"
 	},
 	"scripts": {
 		"_env": "node -p \"'BUILD_TIME=' + new Date().toLocaleString()\" > .env",
-		"start": "yarn _env && rimraf public && parcel -p 8080 --dist-dir public src/index.html",
-		"build": "yarn _env && rimraf public && parcel build --public-url \".\" --dist-dir public --no-source-maps src/index.html",
+		"start": "npm run _env && rimraf public && parcel -p 8080 --dist-dir public src/index.html",
+		"build": "npm run _env && rimraf public && parcel build --public-url \".\" --dist-dir public --no-source-maps src/index.html",
 		"deploy": "gh-pages -d public"
 	}
 }
