@@ -108,7 +108,7 @@ export const TodoComp: TRenderJSX<TodoCompProps, TodoCompState> = (_, v) => {
 					const newIndex = (index + 1) % TodoStates.length
 					todo.state = TodoStates[newIndex]
 					saveTodoLists()
-					v.state.nameInRef?.focus()
+					// v.state.nameInRef?.focus()
 					render()
 				}}
 			>
